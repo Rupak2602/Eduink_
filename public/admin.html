@@ -1,0 +1,292 @@
+//   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Eduink</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/logo.png" type="image/png">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="logo"><a href="index.html">Eduink</a></div>
+        <nav class="nav">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="developer.html" class="nav-link">Developer</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Login Section (Initially visible) -->
+        <div id="loginSection" class="glass-card admin-card">
+            <h2>Admin Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="adminPassword">Password:</label>
+                    <input type="password" id="adminPassword" required placeholder="Enter admin password">
+                </div>
+                <button type="submit" class="btn-glow">Login</button>
+                <p id="loginError" class="error" style="display: none;"></p>
+            </form>
+        </div>
+
+        <!-- Admin Panel (Visible after login) -->
+        <div id="adminPanel" style="display: none;">
+            <div class="admin-banner">
+                <h2>Admin Dashboard</h2>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Upload Question Section -->
+            <div class="glass-card admin-card">
+                <h3>Upload Question Paper</h3>
+                <form id="uploadQuestionForm">
+                    <div class="form-group">
+                        <label for="questionClass">Class:</label>
+                        <select id="questionClass" required>
+                            <option value="">Select Class</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="questionSubject">Subject:</label>
+                        <input type="text" id="questionSubject" required placeholder="e.g., Maths, Science">
+                    </div>
+                    <div class="form-group">
+                        <label for="questionTitle">Title:</label>
+                        <input type="text" id="questionTitle" required placeholder="e.g., March 2025 Exam">
+                    </div>
+                    <div class="form-group">
+                        <label for="questionFile">Upload File (PDF/Image):</label>
+                        <input type="file" id="questionFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+                    <button type="submit" class="btn-glow">Upload Question</button>
+                    <p id="uploadQuestionMsg" class="message" style="display: none;"></p>
+                </form>
+            </div>
+
+            <!-- Add Subject Section -->
+            <div class="glass-card admin-card">
+                <h3>Add Subject</h3>
+                <form id="addSubjectForm">
+                    <div class="form-group">
+                        <label for="subjectClass">Class:</label>
+                        <select id="subjectClass" required>
+                            <option value="">Select Class</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subjectName">Subject Name:</label>
+                        <input type="text" id="subjectName" required placeholder="e.g., Mathematics">
+                    </div>
+                    <button type="submit" class="btn-glow">Add Subject</button>
+                    <p id="addSubjectMsg" class="message" style="display: none;"></p>
+                </form>
+            </div>
+
+            <!-- Add Video Link Section -->
+            <div class="glass-card admin-card">
+                <h3>Add Video Class</h3>
+                <form id="addVideoForm">
+                    <div class="form-group">
+                        <label for="videoClass">Class:</label>
+                        <select id="videoClass" required>
+                            <option value="">Select Class</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="videoSubject">Subject:</label>
+                        <input type="text" id="videoSubject" required placeholder="e.g., Physics">
+                    </div>
+                    <div class="form-group">
+                        <label for="videoTitle">Video Title:</label>
+                        <input type="text" id="videoTitle" required placeholder="e.g., Newton's Laws of Motion">
+                    </div>
+                    <div class="form-group">
+                        <label for="videoUrl">YouTube URL or Video ID:</label>
+                        <input type="text" id="videoUrl" required placeholder="e.g., dQw4w9WgXcQ or youtube.com/watch?v=...">
+                    </div>
+                    <button type="submit" class="btn-glow">Add Video</button>
+                    <p id="addVideoMsg" class="message" style="display: none;"></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Eduink. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Admin password (in production, this would be handled securely on the backend)
+        const ADMIN_PASSWORD = 'eduink@123';
+
+        // Check if admin is already logged in
+        function checkAdminLogin() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn');
+            if (isLoggedIn === 'true') {
+                showAdminPanel();
+            }
+        }
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+            } else {
+                document.getElementById('loginError').textContent = 'Invalid password!';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        // Show admin panel
+        function showAdminPanel() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Handle question upload
+        document.getElementById('uploadQuestionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('class', document.getElementById('questionClass').value);
+            formData.append('subject', document.getElementById('questionSubject').value);
+            formData.append('title', document.getElementById('questionTitle').value);
+            formData.append('file', document.getElementById('questionFile').files[0]);
+
+            try {
+                const response = await fetch('/api/upload-question', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                const msgElement = document.getElementById('uploadQuestionMsg');
+                
+                if (response.ok) {
+                    msgElement.textContent = 'Question uploaded successfully!';
+                    msgElement.className = 'message success';
+                    document.getElementById('uploadQuestionForm').reset();
+                } else {
+                    msgElement.textContent = 'Error: ' + result.message;
+                    msgElement.className = 'message error';
+                }
+                msgElement.style.display = 'block';
+            } catch (error) {
+                console.error('Upload error:', error);
+                const msgElement = document.getElementById('uploadQuestionMsg');
+                msgElement.textContent = 'Error uploading file';
+                msgElement.className = 'message error';
+                msgElement.style.display = 'block';
+            }
+        });
+
+        // Handle add subject
+        document.getElementById('addSubjectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                class: document.getElementById('subjectClass').value,
+                name: document.getElementById('subjectName').value
+            };
+
+            try {
+                const response = await fetch('/api/add-subject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgElement = document.getElementById('addSubjectMsg');
+                
+                if (response.ok) {
+                    msgElement.textContent = 'Subject added successfully!';
+                    msgElement.className = 'message success';
+                    document.getElementById('addSubjectForm').reset();
+                } else {
+                    msgElement.textContent = 'Error: ' + result.message;
+                    msgElement.className = 'message error';
+                }
+                msgElement.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const msgElement = document.getElementById('addSubjectMsg');
+                msgElement.textContent = 'Error adding subject';
+                msgElement.className = 'message error';
+                msgElement.style.display = 'block';
+            }
+        });
+
+        // Handle add video
+        document.getElementById('addVideoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                class: document.getElementById('videoClass').value,
+                subject: document.getElementById('videoSubject').value,
+                title: document.getElementById('videoTitle').value,
+                videoUrl: document.getElementById('videoUrl').value
+            };
+
+            try {
+                const response = await fetch('/api/add-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgElement = document.getElementById('addVideoMsg');
+                
+                if (response.ok) {
+                    msgElement.textContent = 'Video added successfully!';
+                    msgElement.className = 'message success';
+                    document.getElementById('addVideoForm').reset();
+                } else {
+                    msgElement.textContent = 'Error: ' + result.message;
+                    msgElement.className = 'message error';
+                }
+                msgElement.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const msgElement = document.getElementById('addVideoMsg');
+                msgElement.textContent = 'Error adding video';
+                msgElement.className = 'message error';
+                msgElement.style.display = 'block';
+            }
+        });
+
+        // Check login status on page load
+        window.addEventListener('load', checkAdminLogin);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduink Admin - Login</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" href="../icons/logo.png" type="image/png">
+</head>
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-logo">
+            <img src="../icons/logo.png" alt="Eduink Logo" class="logo-img">
+            Eduink Admin Panel
+        </div>
+        <nav class="admin-nav">
+            <a href="/" class="admin-nav-link">Back to Home</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main-container">
+        <div class="admin-login-card">
+            <h1>Admin Login</h1>
+            <p class="admin-subtitle">Secure access to content management</p>
+
+            <form id="adminLoginForm">
+                <div class="admin-form-group">
+                    <label for="adminPassword">Admin Password:</label>
+                    <input 
+                        type="password" 
+                        id="adminPassword" 
+                        required 
+                        placeholder="Enter admin password"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <button type="submit" class="admin-btn-login">Login to Dashboard</button>
+
+                <p id="loginError" class="admin-error" style="display: none;"></p>
+            </form>
+
+            <div class="admin-login-footer">
+                <p>👤 For admin access only</p>
+                <p>🔐 Secure authentication required</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+        <p>&copy; 2026 Eduink Admin. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Admin password (change this in production!)
+        const ADMIN_PASSWORD = 'eduink@123';
+
+        // Handle login form submission
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const password = document.getElementById('adminPassword').value;
+
+            if (password === ADMIN_PASSWORD) {
+                // Store login status with timestamp (expires in 24 hours)
+                const loginData = {
+                    loggedIn: true,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('adminSession', JSON.stringify(loginData));
+                
+                // Redirect to dashboard
+                window.location.href = '/admin/dashboard';
+            } else {
+                // Show error message
+                const errorElement = document.getElementById('loginError');
+                errorElement.textContent = '❌ Invalid password. Please try again.';
+                errorElement.style.display = 'block';
+
+                // Clear password field
+                document.getElementById('adminPassword').value = '';
+            }
+        });
+
+        // Check if already logged in
+        function checkExistingLogin() {
+            try {
+                const sessionData = JSON.parse(localStorage.getItem('adminSession'));
+                if (sessionData && sessionData.loggedIn) {
+                    // Check if session is still valid (24 hours)
+                    const ageInHours = (Date.now() - sessionData.timestamp) / (1000 * 60 * 60);
+                    if (ageInHours < 24) {
+                        // Redirect to dashboard if already logged in
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        // Session expired, clear it
+                        localStorage.removeItem('adminSession');
+                    }
+                }
+            } catch (error) {
+                console.log('No valid session found');
+            }
+        }
+
+        // Check login on page load
+        window.addEventListener('load', checkExistingLogin);
+    </script>
+</body>
+</html>

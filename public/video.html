@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Classes - Eduink</title>
+    <link rel="stylesheet" href="style.css">    <link rel="manifest" href="manifest.json">    <link rel="icon" href="icons/logo.png" type="image/png"></head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">
+                <img src="icons/logo.png" alt="Eduink Logo" class="logo-img">
+                Eduink
+            </a>
+        </div>
+        <nav class="nav">
+            <a href="developer.html" class="nav-link">Developer</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="page-title" id="pageTitle">Video Classes</div>
+        
+        <div class="videos-container" id="videosContainer">
+            <!-- Videos will be loaded here dynamically -->
+            <div class="loading">Loading videos...</div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Eduink. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get class and subject from URL
+        const selectedClass = getQueryParam('class');
+        const selectedSubject = getQueryParam('subject');
+
+        // Function to extract YouTube ID from URL or ID
+        function getYoutubeEmbedUrl(videoUrl) {
+            // If it's already a YouTube URL, extract the ID
+            if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                let videoId;
+                if (videoUrl.includes('youtu.be')) {
+                    videoId = videoUrl.split('/').pop();
+                } else {
+                    const url = new URL(videoUrl);
+                    videoId = url.searchParams.get('v');
+                }
+                return `https://www.youtube.com/embed/${videoId}`;
+            }
+            // If it's just the video ID, use it directly
+            return `https://www.youtube.com/embed/${videoUrl}`;
+        }
+
+        // Fetch videos from backend API
+        async function loadVideos() {
+            try {
+                const response = await fetch(`/api/videos/${selectedSubject}?class=${selectedClass}`);
+                const videos = await response.json();
+
+                // Update page title
+                document.getElementById('pageTitle').textContent = 
+                    `Class ${selectedClass} - ${selectedSubject} - Video Classes`;
+
+                const container = document.getElementById('videosContainer');
+                container.innerHTML = ''; // Clear loading text
+
+                if (videos.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No videos available yet.</div>';
+                    return;
+                }
+
+                // Display videos
+                videos.forEach(video => {
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    
+                    const embedUrl = getYoutubeEmbedUrl(video.videoUrl);
+                    
+                    const contentHTML = `
+                        <h3>${video.title}</h3>
+                        <iframe 
+                            width="100%" 
+                            height="300" 
+                            src="${embedUrl}" 
+                            title="${video.title}"
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    `;
+                    
+                    card.innerHTML = contentHTML;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                document.getElementById('videosContainer').innerHTML = 
+                    '<div class="error">Error loading videos. Please try again.</div>';
+            }
+        }
+
+        // Load videos on page load
+        window.addEventListener('load', loadVideos);
+    </script>
+</body>
+</html>

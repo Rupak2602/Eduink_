@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjects - Eduink</title>
+    <link rel="stylesheet" href="style.css">    <link rel="manifest" href="manifest.json">    <link rel="icon" href="icons/logo.png" type="image/png"></head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">
+                <img src="icons/logo.png" alt="Eduink Logo" class="logo-img">
+                Eduink
+            </a>
+        </div>
+        <nav class="nav">
+            <a href="developer.html" class="nav-link">Developer</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="page-title" id="pageTitle">Subjects</div>
+        
+        <div class="subjects-grid" id="subjectsContainer">
+            <!-- Subjects will be loaded here dynamically -->
+            <div class="loading">Loading subjects...</div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Eduink. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get the class from URL
+        const selectedClass = getQueryParam('class');
+
+        // Fetch subjects from backend API
+        async function loadSubjects() {
+            try {
+                const response = await fetch(`/api/subjects/${selectedClass}`);
+                const subjects = await response.json();
+
+                // Update page title
+                document.getElementById('pageTitle').textContent = `Class ${selectedClass} - Subjects`;
+
+                const container = document.getElementById('subjectsContainer');
+                container.innerHTML = ''; // Clear loading text
+
+                // Display subjects as cards
+                subjects.forEach(subject => {
+                    const card = document.createElement('div');
+                    card.className = 'subject-card';
+                    card.innerHTML = `
+                        <h3>${subject}</h3>
+                        <div class="subject-buttons">
+                            <button class="btn-subject" onclick="goToQuestions('${subject}')">Question Bank</button>
+                            <button class="btn-subject btn-notes" onclick="goToNotes('${subject}')">Notes</button>
+                            <button class="btn-subject" onclick="goToVideos('${subject}')">Video Classes</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                document.getElementById('subjectsContainer').innerHTML = 
+                    '<div class="error">Error loading subjects. Please try again.</div>';
+            }
+        }
+
+        // Function to navigate to questions page
+        function goToQuestions(subject) {
+            window.location.href = `question.html?class=${selectedClass}&subject=${subject}`;
+        }
+
+        // Function to navigate to notes page with class and subject
+        function goToNotes(subject) {
+            window.location.href = `notes.html?class=${selectedClass}&subject=${subject}`;
+        }
+
+        // Function to navigate to videos page
+        function goToVideos(subject) {
+            window.location.href = `video.html?class=${selectedClass}&subject=${subject}`;
+        }
+
+        // Load subjects on page load
+        window.addEventListener('load', loadSubjects);
+    </script>
+</body>
+</html>

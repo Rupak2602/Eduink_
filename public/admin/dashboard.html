@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduink Admin - Dashboard</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" href="../icons/logo.png" type="image/png">
+</head>
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-logo">
+            <img src="../icons/logo.png" alt="Eduink Logo" class="logo-img">
+            Eduink Admin Dashboard
+        </div>
+        <nav class="admin-nav">
+            <span id="adminUsername" class="admin-username">Admin</span>
+            <button class="admin-nav-link admin-logout-btn" onclick="logout()">Logout</button>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main-container">
+        <div class="admin-welcome">
+            <h2>Welcome to Admin Dashboard</h2>
+            <p>Manage questions, subjects, and videos for your educational platform</p>
+        </div>
+
+        <!-- Admin Actions Grid -->
+        <div class="admin-actions-grid">
+            <!-- Upload Question Card -->
+            <div class="admin-action-card">
+                <div class="admin-action-icon">📋</div>
+                <h3>Upload Questions</h3>
+                <p>Add question papers (PDF or Images)</p>
+                <a href="/admin/upload" class="admin-action-btn">Go to Upload</a>
+            </div>
+
+            <!-- Add Subject Card -->
+            <div class="admin-action-card">
+                <div class="admin-action-icon">📚</div>
+                <h3>Add Subjects</h3>
+                <p>Create new subjects for classes</p>
+                <button class="admin-action-btn" onclick="showSubjectForm()">Add Subject</button>
+            </div>
+
+            <!-- Add Video Card -->
+            <div class="admin-action-card">
+                <div class="admin-action-icon">🎥</div>
+                <h3>Add Videos</h3>
+                <p>Link YouTube video lectures</p>
+                <button class="admin-action-btn" onclick="showVideoForm()">Add Video</button>
+            </div>
+
+            <!-- View Content Card -->
+            <div class="admin-action-card">
+                <div class="admin-action-icon">👁️</div>
+                <h3>View Content</h3>
+                <p>See all uploaded materials</p>
+                <button class="admin-action-btn" onclick="showContent()">View All</button>
+            </div>
+        </div>
+
+        <!-- Add Subject Form (Hidden by default) -->
+        <div id="subjectFormContainer" class="admin-form-container" style="display: none;">
+            <div class="admin-form-card">
+                <button class="admin-close-form" onclick="hideSubjectForm()">✕</button>
+                <h3>Add New Subject</h3>
+
+                <form id="addSubjectForm">
+                    <div class="admin-form-group">
+                        <label for="subjectClass">Class:</label>
+                        <select id="subjectClass" required>
+                            <option value="">Select Class</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                        </select>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="subjectName">Subject Name:</label>
+                        <input 
+                            type="text" 
+                            id="subjectName" 
+                            required 
+                            placeholder="e.g., Mathematics"
+                        >
+                    </div>
+
+                    <button type="submit" class="admin-btn-submit">Add Subject</button>
+                    <p id="subjectMsg" class="admin-message" style="display: none;"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Video Form (Hidden by default) -->
+        <div id="videoFormContainer" class="admin-form-container" style="display: none;">
+            <div class="admin-form-card">
+                <button class="admin-close-form" onclick="hideVideoForm()">✕</button>
+                <h3>Add New Video</h3>
+
+                <form id="addVideoForm">
+                    <div class="admin-form-group">
+                        <label for="videoClass">Class:</label>
+                        <select id="videoClass" required>
+                            <option value="">Select Class</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                        </select>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="videoSubject">Subject:</label>
+                        <input 
+                            type="text" 
+                            id="videoSubject" 
+                            required 
+                            placeholder="e.g., Physics"
+                        >
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="videoTitle">Video Title:</label>
+                        <input 
+                            type="text" 
+                            id="videoTitle" 
+                            required 
+                            placeholder="e.g., Newton's Laws"
+                        >
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="videoUrl">YouTube URL or Video ID:</label>
+                        <input 
+                            type="text" 
+                            id="videoUrl" 
+                            required 
+                            placeholder="e.g., dQw4w9WgXcQ"
+                        >
+                    </div>
+
+                    <button type="submit" class="admin-btn-submit">Add Video</button>
+                    <p id="videoMsg" class="admin-message" style="display: none;"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Content View (Hidden by default) -->
+        <div id="contentContainer" class="admin-content-view" style="display: none;">
+            <div class="admin-content-card">
+                <button class="admin-close-form" onclick="hideContent()">✕</button>
+                <h3>Uploaded Content</h3>
+                <div id="contentList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+        <p>&copy; 2026 Eduink Admin. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Check if admin is logged in
+        function checkAdminAuth() {
+            try {
+                const sessionData = JSON.parse(localStorage.getItem('adminSession'));
+                if (!sessionData || !sessionData.loggedIn) {
+                    window.location.href = '/admin';
+                }
+            } catch (error) {
+                window.location.href = '/admin';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('adminSession');
+                window.location.href = '/admin';
+            }
+        }
+
+        // Form visibility functions
+        function showSubjectForm() {
+            document.getElementById('subjectFormContainer').style.display = 'block';
+        }
+
+        function hideSubjectForm() {
+            document.getElementById('subjectFormContainer').style.display = 'none';
+            document.getElementById('addSubjectForm').reset();
+        }
+
+        function showVideoForm() {
+            document.getElementById('videoFormContainer').style.display = 'block';
+        }
+
+        function hideVideoForm() {
+            document.getElementById('videoFormContainer').style.display = 'none';
+            document.getElementById('addVideoForm').reset();
+        }
+
+        function showContent() {
+            document.getElementById('contentContainer').style.display = 'block';
+            loadContent();
+        }
+
+        function hideContent() {
+            document.getElementById('contentContainer').style.display = 'none';
+        }
+
+        // Load all uploaded content
+        async function loadContent() {
+            try {
+                // This would load from your backend
+                const contentList = document.getElementById('contentList');
+                contentList.innerHTML = `
+                    <p style="color: #999;">Content management coming soon...</p>
+                    <p style="color: #999;">Use the Upload and Add forms above to manage your content.</p>
+                `;
+            } catch (error) {
+                console.error('Error loading content:', error);
+            }
+        }
+
+        // Handle Add Subject
+        document.getElementById('addSubjectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                class: document.getElementById('subjectClass').value,
+                name: document.getElementById('subjectName').value
+            };
+
+            try {
+                const response = await fetch('/api/add-subject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgElement = document.getElementById('subjectMsg');
+
+                if (response.ok) {
+                    msgElement.textContent = '✅ Subject added successfully!';
+                    msgElement.className = 'admin-message success';
+                    document.getElementById('addSubjectForm').reset();
+                    setTimeout(() => hideSubjectForm(), 2000);
+                } else {
+                    msgElement.textContent = '❌ Error: ' + (result.message || 'Could not add subject');
+                    msgElement.className = 'admin-message error';
+                }
+                msgElement.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const msgElement = document.getElementById('subjectMsg');
+                msgElement.textContent = '❌ Error adding subject';
+                msgElement.className = 'admin-message error';
+                msgElement.style.display = 'block';
+            }
+        });
+
+        // Handle Add Video
+        document.getElementById('addVideoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                class: document.getElementById('videoClass').value,
+                subject: document.getElementById('videoSubject').value,
+                title: document.getElementById('videoTitle').value,
+                videoUrl: document.getElementById('videoUrl').value
+            };
+
+            try {
+                const response = await fetch('/api/add-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgElement = document.getElementById('videoMsg');
+
+                if (response.ok) {
+                    msgElement.textContent = '✅ Video added successfully!';
+                    msgElement.className = 'admin-message success';
+                    document.getElementById('addVideoForm').reset();
+                    setTimeout(() => hideVideoForm(), 2000);
+                } else {
+                    msgElement.textContent = '❌ Error: ' + (result.message || 'Could not add video');
+                    msgElement.className = 'admin-message error';
+                }
+                msgElement.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const msgElement = document.getElementById('videoMsg');
+                msgElement.textContent = '❌ Error adding video';
+                msgElement.className = 'admin-message error';
+                msgElement.style.display = 'block';
+            }
+        });
+
+        // Check authentication on page load
+        window.addEventListener('load', checkAdminAuth);
+    </script>
+</body>
+</html>

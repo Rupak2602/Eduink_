@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Class - Eduink</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/logo.png" type="image/png">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">
+                <img src="icons/logo.png" alt="Eduink Logo" class="logo-img">
+                Eduink
+            </a>
+        </div>
+        <nav class="nav">
+            <a href="developer.html" class="nav-link">Developer</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="page-title">Select Your Class</div>
+        
+        <div class="class-buttons">
+            <button class="class-btn" onclick="selectClass('9th')">9th</button>
+            <button class="class-btn" onclick="selectClass('10th')">10th</button>
+            <button class="class-btn" onclick="selectClass('11th')">11th</button>
+            <button class="class-btn" onclick="selectClass('12th')">12th</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Eduink. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to handle class selection
+        function selectClass(classNum) {
+            // Redirect to subjects page with class parameter
+            window.location.href = `subjects.html?class=${classNum}`;
+        }
+    </script>
+</body>
+</html>

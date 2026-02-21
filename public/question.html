@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Bank - Eduink</title>
+    <link rel="stylesheet" href="style.css">    <link rel="manifest" href="manifest.json">    <link rel="icon" href="icons/logo.png" type="image/png"></head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">
+                <img src="icons/logo.png" alt="Eduink Logo" class="logo-img">
+                Eduink
+            </a>
+        </div>
+        <nav class="nav">
+            <a href="developer.html" class="nav-link">Developer</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="page-title" id="pageTitle">Question Bank</div>
+        
+        <div class="questions-container" id="questionsContainer">
+            <!-- Questions will be loaded here dynamically -->
+            <div class="loading">Loading questions...</div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Eduink. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get class and subject from URL
+        const selectedClass = getQueryParam('class');
+        const selectedSubject = getQueryParam('subject');
+
+        // Fetch questions from backend API
+        async function loadQuestions() {
+            try {
+                const response = await fetch(`/api/questions/${selectedSubject}?class=${selectedClass}`);
+                const questions = await response.json();
+
+                // Update page title
+                document.getElementById('pageTitle').textContent = 
+                    `Class ${selectedClass} - ${selectedSubject} - Question Bank`;
+
+                const container = document.getElementById('questionsContainer');
+                container.innerHTML = ''; // Clear loading text
+
+                if (questions.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No questions available yet.</div>';
+                    return;
+                }
+
+                // Display questions
+                questions.forEach(question => {
+                    const card = document.createElement('div');
+                    card.className = 'question-card';
+                    
+                    let contentHTML = `<h3>${question.title}</h3>`;
+                    
+                    // Display preview if image
+                    if (question.fileType === 'image') {
+                        contentHTML += `<img src="${question.fileUrl}" alt="Question Paper" class="question-preview">`;
+                    }
+                    
+                    // Add download/open button
+                    if (question.fileType === 'pdf') {
+                        contentHTML += `<a href="${question.fileUrl}" target="_blank" class="btn-download">Open PDF</a>`;
+                    } else {
+                        contentHTML += `<a href="${question.fileUrl}" download class="btn-download">Download Image</a>`;
+                    }
+                    
+                    card.innerHTML = contentHTML;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                document.getElementById('questionsContainer').innerHTML = 
+                    '<div class="error">Error loading questions. Please try again.</div>';
+            }
+        }
+
+        // Load questions on page load
+        window.addEventListener('load', loadQuestions);
+    </script>
+</body>
+</html>

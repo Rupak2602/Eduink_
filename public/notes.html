@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - Eduink</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/logo.png" type="image/png">
+    <style>
+        /* Notes specific styles */
+        .notes-page {
+            animation: fadeIn 0.6s ease;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            animation: slideUp 0.6s ease;
+        }
+
+        .note-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1.8rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .note-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .note-card h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            margin-top: 0;
+        }
+
+        .note-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .note-subject {
+            font-weight: 500;
+            color: #667eea;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .note-caption {
+            color: #888;
+            font-size: 0.9rem;
+            font-style: italic;
+            margin: 0.8rem 0;
+            padding: 0.8rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .btn-note-download {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-note-download:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.1rem;
+            padding: 2rem;
+        }
+
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.1rem;
+            padding: 2rem;
+        }
+
+        .notes-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .notes-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .notes-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">
+                <img src="icons/logo.png" alt="Eduink Logo" class="logo-img">
+                Eduink
+            </a>
+        </div>
+        <nav class="nav">
+            <a href="developer.html" class="nav-link">Developer</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container notes-page">
+        <!-- Header Section -->
+        <div class="notes-header">
+            <h1 id="pageTitle">Notes</h1>
+            <p id="subjectInfo"></p>
+        </div>
+
+        <!-- Back Button -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button class="back-button" onclick="goBack()">← Back to Subjects</button>
+        </div>
+
+        <!-- Notes Container -->
+        <div class="notes-grid" id="notesContainer">
+            <!-- Notes will be loaded here dynamically -->
+            <div class="loading">Loading notes...</div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Eduink. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ============================================
+        // NOTES PAGE - FETCH AND DISPLAY NOTES
+        // ============================================
+
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get class and subject from URL parameters
+        const selectedClass = getQueryParam('class');
+        const selectedSubject = getQueryParam('subject');
+
+        // Function to go back to subjects page
+        function goBack() {
+            // Go back to previous page in history
+            window.history.back();
+        }
+
+        // Fetch and display notes for the class and subject
+        async function loadNotes() {
+            try {
+                // Validate class and subject parameters
+                if (!selectedClass || !selectedSubject) {
+                    document.getElementById('notesContainer').innerHTML = 
+                        `<div class="error" style="grid-column: 1/-1;">Invalid class or subject selected.</div>`;
+                    return;
+                }
+
+                // Update page title
+                document.getElementById('pageTitle').textContent = `${selectedSubject} - Notes`;
+                document.getElementById('subjectInfo').textContent = `Study materials for ${selectedClass} - ${selectedSubject}`;
+
+                // Fetch notes from backend API using BOTH class and subject
+                // This ensures notes are only shown for the correct class-subject combination
+                const response = await fetch(`/api/notes/${selectedClass}/${selectedSubject}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch notes');
+                }
+
+                const notes = await response.json();
+                const container = document.getElementById('notesContainer');
+                container.innerHTML = ''; // Clear loading text
+
+                // Check if there are any notes
+                if (!notes || notes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <p>📚 No notes available for ${selectedSubject}</p>
+                            <p style="color: #ccc; font-size: 0.9rem;">Check back soon for study materials</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Display notes as cards
+                notes.forEach(note => {
+                    const card = document.createElement('div');
+                    card.className = 'note-card';
+                    
+                    // Build download button based on file type
+                    const downloadBtn = `
+                        <a href="${note.file_url}" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="btn-note-download">
+                            ${note.file_url.includes('.pdf') ? '📄 Open PDF' : '🖼️ View File'}
+                        </a>
+                    `;
+
+                    // Build caption section if exists
+                    const captionSection = note.caption ? `
+                        <p class="note-caption">${note.caption}</p>
+                    ` : '';
+
+                    card.innerHTML = `
+                        <h4>${note.title}</h4>
+                        <p class="note-subject">${selectedSubject}</p>
+                        ${captionSection}
+                        ${downloadBtn}
+                    `;
+                    
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                document.getElementById('notesContainer').innerHTML = 
+                    `<div class="error" style="grid-column: 1/-1;">Error loading notes. Please try again later.</div>`;
+            }
+        }
+
+        // Load notes on page load
+        window.addEventListener('load', loadNotes);
+    </script>
+</body>
+</html>
