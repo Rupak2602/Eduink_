@@ -25,6 +25,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Simple keep-alive route for Render free-tier or uptime monitors
+app.get('/ping', (req, res) => {
+    res.send('Alive');
+});
+
 // Configure multer for file uploads
 const upload = multer({ 
     storage: multer.memoryStorage(),
