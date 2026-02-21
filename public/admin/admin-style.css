@@ -490,6 +490,28 @@
     border-bottom-color: #667eea;
 }
 
+/* Admin Upload Container */
+.admin-upload-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s ease;
+}
+
+.admin-upload-container h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.admin-subtitle {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
 @media (max-width: 480px) {
     .admin-logo {
         font-size: 1.3rem;
