@@ -2,177 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Classes - Eduink</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icons/logo.png" type="image/png">
 </head>
 <body>
 
 <header class="header">
     <div class="logo">
         <a href="index.html">
-            <img src="icons/logo.png" alt="Eduink Logo" class="logo-img">
             Eduink
         </a>
     </div>
-    <nav class="nav">
-        <a href="developer.html" class="nav-link">Developer</a>
-    </nav>
 </header>
 
-<main class="main-container">
-    <div class="page-title" id="pageTitle">Video Classes</div>
-    <div class="videos-container" id="videosContainer">
-        <div class="loading">Loading videos...</div>
+<main class="main-container" style="text-align:center; padding:80px 20px;">
+    
+    <h1 style="font-size:32px; margin-bottom:20px;">
+        🎥 Video Classes
+    </h1>
+
+    <div style="
+        background:#f3f4f6;
+        padding:40px;
+        border-radius:12px;
+        max-width:500px;
+        margin:auto;
+        box-shadow:0 8px 20px rgba(0,0,0,0.1);
+    ">
+        <h2 style="margin-bottom:15px;">
+            🚀 Coming Soon!
+        </h2>
+        <p style="color:#555;">
+            Video classes for this subject will be available soon.
+            Stay tuned with Eduink 💙
+        </p>
     </div>
+
 </main>
 
 <footer class="footer">
     <p>&copy; 2026 Eduink. All rights reserved.</p>
 </footer>
-
-<script>
-
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
-
-const selectedClass = getQueryParam('class');
-const selectedSubject = getQueryParam('subject');
-
-const VIDEO_STORAGE_KEY = `videoData_${selectedSubject || 'all'}_${selectedClass || 'all'}`;
-
-function getYoutubeEmbedUrl(videoUrl) {
-    try {
-        if (!videoUrl) return '';
-
-        if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-            let videoId;
-
-            if (videoUrl.includes('youtu.be')) {
-                videoId = videoUrl.split('/').pop().split('?')[0];
-            } else {
-                const url = new URL(videoUrl);
-                videoId = url.searchParams.get('v');
-            }
-
-            if (!videoId) return '';
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-
-        return `https://www.youtube.com/embed/${videoUrl}`;
-    } catch (e) {
-        console.error("Invalid YouTube URL:", videoUrl);
-        return '';
-    }
-}
-
-function renderVideos(videos) {
-    const container = document.getElementById('videosContainer');
-    container.innerHTML = '';
-
-    if (!videos || videos.length === 0) {
-        container.innerHTML = '<div class="empty-state">No videos available yet.</div>';
-        return;
-    }
-
-    videos.forEach(video => {
-
-        const rawUrl = video.videoUrl || video.video_url || '';
-        if (!rawUrl) return;
-
-        const embedUrl = getYoutubeEmbedUrl(rawUrl);
-        if (!embedUrl) return;
-
-        const card = document.createElement('div');
-        card.className = 'video-card';
-
-        card.innerHTML = `
-            <h3>${video.title}</h3>
-            <iframe 
-                width="100%" 
-                height="300" 
-                src="${embedUrl}" 
-                title="${video.title}"
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-            </iframe>
-        `;
-
-        container.appendChild(card);
-    });
-}
-
-function showWarning(message) {
-    let banner = document.getElementById('videoWarningBanner');
-    if (!banner) {
-        banner = document.createElement('div');
-        banner.id = 'videoWarningBanner';
-        banner.style.background = '#fff3cd';
-        banner.style.padding = '8px';
-        banner.style.margin = '8px 0';
-        banner.style.borderRadius = '4px';
-        banner.style.color = '#856404';
-        const container = document.getElementById('videosContainer');
-        container.parentNode.insertBefore(banner, container);
-    }
-    banner.textContent = message;
-}
-
-async function loadVideosOnce() {
-
-    const container = document.getElementById('videosContainer');
-
-    if (!selectedClass || !selectedSubject) {
-        container.innerHTML = '<div class="error">Invalid class or subject.</div>';
-        return;
-    }
-
-    // Use cache first
-    try {
-        const cached = localStorage.getItem(VIDEO_STORAGE_KEY);
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed && Array.isArray(parsed.videos)) {
-                renderVideos(parsed.videos);
-            }
-        }
-    } catch (err) {
-        console.error("Cache read error:", err);
-    }
-
-    try {
-        const response = await fetch(
-            `/api/videos/${encodeURIComponent(selectedSubject)}?class=${encodeURIComponent(selectedClass)}`,
-            { cache: "no-store" }
-        );
-
-        if (!response.ok) {
-            throw new Error("API Error");
-        }
-
-        const videos = await response.json();
-
-        localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify({ videos }));
-
-        renderVideos(videos);
-
-        document.getElementById('pageTitle').textContent =
-            `Class ${selectedClass} - ${selectedSubject} - Video Classes`;
-
-    } catch (error) {
-        console.error("Fetch error:", error);
-        showWarning("Server sleeping or refresh failed. Showing cached videos if available.");
-    }
-}
-
-window.addEventListener('DOMContentLoaded', loadVideosOnce);
-
-</script>
 
 </body>
 </html>
